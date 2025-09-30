@@ -1,0 +1,68 @@
+name: Build Electron App
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: macos-15-intel
+            cmd: npm run packmacosx64
+            name: mac-x64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Decode and import certificates
+        if: matrix.os == 'macos-15' || matrix.os == 'macos-15-intel'
+        run: |
+          echo "$APPLE_APPLICATION_P12" | base64 --decode > application.p12
+          echo "$APPLE_INSTALLER_P12" | base64 --decode > installer.p12
+
+          # 导入证书到 keychain
+          security create-keychain -p "" build.keychain
+          security import application.p12 -k build.keychain -P "$APPLE_P12_PASSWORD" -T /usr/bin/codesign
+          security import installer.p12 -k build.keychain -P "$APPLE_P12_PASSWORD" -T /usr/bin/codesign
+          security list-keychains -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          security set-keychain-settings -t 3600 -l build.keychain
+        env:
+          APPLE_APPLICATION_P12: ${{ secrets.APPLE_APPLICATION_P12 }}
+          APPLE_INSTALLER_P12: ${{ secrets.APPLE_INSTALLER_P12 }}
+          APPLE_P12_PASSWORD: ${{ secrets.APPLE_P12_PASSWORD }}
+
+
+      - name: Build
+        run: ${{ matrix.cmd }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # 只在 macOS 设置
+          CSC_LINK: ${{ secrets.APPLE_APPLICATION_P12 }}
+          CSC_KEY_PASSWORD: ${{ secrets.APPLE_P12_PASSWORD }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: |
+            dist/*.exe
+            dist/*.zip
+            dist/*.dmg
+            dist/*.pkg

@@ -1,0 +1,26 @@
+{
+  "name": "test-mac-sign",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/xiang-xx/test-mac-sign#readme",
+  "bugs": {
+    "url": "https://github.com/xiang-xx/test-mac-sign/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xiang-xx/test-mac-sign.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "dist": "electron-builder --config electron-builder.yml"
+  },
+  "devDependencies": {
+    "electron": "^38.2.0",
+    "electron-builder": "^26.0.12"
+  }
+}
