@@ -17,7 +17,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "dist": "electron-builder --config electron-builder.yml"
+    "dist": "electron-builder --config electron-builder.yml --macos --x64"
   },
   "devDependencies": {
     "electron": "^38.2.0",

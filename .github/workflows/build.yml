@@ -10,7 +10,7 @@ jobs:
       matrix:
         include:
           - os: macos-15-intel
-            cmd: npm run packmacosx64
+            cmd: npm run dist
             name: mac-x64
 
     runs-on: ${{ matrix.os }}
